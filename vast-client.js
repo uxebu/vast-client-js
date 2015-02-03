@@ -58,10 +58,8 @@ EventEmitter.prototype.emit = function(type) {
       er = arguments[1];
       if (er instanceof Error) {
         throw er; // Unhandled 'error' event
-      } else {
-        throw TypeError('Uncaught, unspecified "error" event.');
       }
-      return false;
+      throw TypeError('Uncaught, unspecified "error" event.');
     }
   }
 
@@ -498,6 +496,7 @@ var VASTMediaFile;
 
 VASTMediaFile = (function() {
   function VASTMediaFile() {
+    this.id = null;
     this.fileURL = null;
     this.deliveryType = "progressive";
     this.mimeType = null;
@@ -508,6 +507,8 @@ VASTMediaFile = (function() {
     this.width = 0;
     this.height = 0;
     this.apiFramework = null;
+    this.scalable = null;
+    this.maintainAspectRatio = null;
   }
 
   return VASTMediaFile;
@@ -590,7 +591,8 @@ VASTParser = (function() {
   };
 
   VASTParser._parse = function(url, parentURLs, options, cb) {
-    var filter, _i, _len;
+    var filter, handler, _i, _len;
+    handler = URLHandler;
     for (_i = 0, _len = URLTemplateFilters.length; _i < _len; _i++) {
       filter = URLTemplateFilters[_i];
       url = filter(url);
@@ -606,7 +608,10 @@ VASTParser = (function() {
     if (!options) {
       options = {};
     }
-    return URLHandler.get(url, options, (function(_this) {
+    if (options.handler != null) {
+      handler = options.handler;
+    }
+    return handler.get(url, options, (function(_this) {
       return function(err, xml) {
         var ad, complete, loopIndex, node, response, _j, _k, _len1, _len2, _ref, _ref1;
         if (err != null) {
@@ -858,7 +863,7 @@ VASTParser = (function() {
   };
 
   VASTParser.parseCreativeLinearElement = function(creativeElement) {
-    var clickTrackingElement, creative, eventName, mediaFile, mediaFileElement, mediaFilesElement, percent, skipOffset, trackingElement, trackingEventsElement, trackingURLTemplate, videoClicksElement, _base, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _ref, _ref1, _ref2, _ref3, _ref4;
+    var clickTrackingElement, creative, eventName, maintainAspectRatio, mediaFile, mediaFileElement, mediaFilesElement, percent, scalable, skipOffset, trackingElement, trackingEventsElement, trackingURLTemplate, videoClicksElement, _base, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _ref, _ref1, _ref2, _ref3, _ref4;
     creative = new VASTCreativeLinear();
     creative.duration = this.parseDuration(this.parseNodeText(this.childByName(creativeElement, "Duration")));
     if (creative.duration === -1 && creativeElement.parentNode.parentNode.parentNode.nodeName !== 'Wrapper') {
@@ -905,6 +910,7 @@ VASTParser = (function() {
       for (_m = 0, _len4 = _ref4.length; _m < _len4; _m++) {
         mediaFileElement = _ref4[_m];
         mediaFile = new VASTMediaFile();
+        mediaFile.id = mediaFileElement.getAttribute("id");
         mediaFile.fileURL = this.parseNodeText(mediaFileElement);
         mediaFile.deliveryType = mediaFileElement.getAttribute("delivery");
         mediaFile.codec = mediaFileElement.getAttribute("codec");
@@ -915,6 +921,24 @@ VASTParser = (function() {
         mediaFile.maxBitrate = parseInt(mediaFileElement.getAttribute("maxBitrate") || 0);
         mediaFile.width = parseInt(mediaFileElement.getAttribute("width") || 0);
         mediaFile.height = parseInt(mediaFileElement.getAttribute("height") || 0);
+        scalable = mediaFileElement.getAttribute("scalable");
+        if (scalable && typeof scalable === "string") {
+          scalable = scalable.toLowerCase();
+          if (scalable === "true") {
+            mediaFile.scalable = true;
+          } else if (scalable === "false") {
+            mediaFile.scalable = false;
+          }
+        }
+        maintainAspectRatio = mediaFileElement.getAttribute("maintainAspectRatio");
+        if (maintainAspectRatio && typeof maintainAspectRatio === "string") {
+          maintainAspectRatio = maintainAspectRatio.toLowerCase();
+          if (maintainAspectRatio === "true") {
+            mediaFile.maintainAspectRatio = true;
+          } else if (maintainAspectRatio === "false") {
+            mediaFile.maintainAspectRatio = false;
+          }
+        }
         creative.mediaFiles.push(mediaFile);
       }
     }

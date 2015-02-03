@@ -40,6 +40,8 @@ class VASTParser
 
     @_parse: (url, parentURLs, options, cb) ->
 
+        handler = URLHandler
+
         # Process url with defined filter
         url = filter(url) for filter in URLTemplateFilters
 
@@ -52,7 +54,9 @@ class VASTParser
           
         options = {} if not options
         
-        URLHandler.get url, options, (err, xml) =>
+        handler = options.handler if options.handler?
+        
+        handler.get url, options, (err, xml) =>
             return cb(err) if err?
 
             response = new VASTResponse()
