@@ -48,6 +48,19 @@ describe 'VASTParser', ->
         it 'should have two creatives', =>
             @response.ads[0].creatives.should.have.length 2
 
+        it 'should call passed URLHandler, which got passed via options', (done) =>
+            called = false
+            spy = (url, options, cb) ->
+              called = true
+              cb()
+            options =
+              handler:
+                get: spy
+
+            VASTParser.parse urlfor('wrapper.xml'), options, (@response) =>
+                called.should.eql true
+                done()
+
         #Linear
         describe '#Linear', ->
             linear = null
