@@ -108,7 +108,7 @@ class VASTParser
                         baseURL = url.slice(0, url.lastIndexOf('/'))
                         ad.nextWrapperURL = "#{baseURL}/#{ad.nextWrapperURL}"
 
-                    @_parse ad.nextWrapperURL, parentURLs, (err, wrappedResponse) =>
+                    @_parse ad.nextWrapperURL, parentURLs, options, (err, wrappedResponse) =>
                         errorAlreadyRaised = false
                         if err?
                             # Timeout of VAST URI provided in Wrapper element, or of VAST URI provided in a subsequent Wrapper element.

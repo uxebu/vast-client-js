@@ -687,7 +687,7 @@ VASTParser = (function() {
               baseURL = url.slice(0, url.lastIndexOf('/'));
               ad.nextWrapperURL = "" + baseURL + "/" + ad.nextWrapperURL;
             }
-            return _this._parse(ad.nextWrapperURL, parentURLs, function(err, wrappedResponse) {
+            return _this._parse(ad.nextWrapperURL, parentURLs, options, function(err, wrappedResponse) {
               var creative, errorAlreadyRaised, eventName, index, wrappedAd, _base, _l, _len3, _len4, _len5, _len6, _m, _n, _o, _ref3, _ref4, _ref5, _ref6;
               errorAlreadyRaised = false;
               if (err != null) {
